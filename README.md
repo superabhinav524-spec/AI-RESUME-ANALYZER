@@ -99,58 +99,7 @@ AI-Resume-Analyzer/
 
 ---
 
-🌐 Deploy on GitHub Pages
 
-Step 1
-
-Create a new repository named:
-
-AI-Resume-Analyzer
-
-Step 2
-
-Upload:
-
-- index.html
-- style.css
-- script.js
-- README.md
-
-Step 3
-
-Go to:
-
-Settings → Pages
-
-Step 4
-
-Under Build and Deployment:
-
-Source: Deploy from a branch
-
-Branch: main
-
-Folder: /(root)
-
-Click Save.
-
-Step 5
-
-Wait 1-2 minutes.
-
-Your website will be available at:
-
-https://yourusername.github.io/AI-Resume-Analyzer/
-
----
-
-📸 Suggested Screenshots
-
-- Home Page
-- ATS Score Page
-- Job Match Results
-- Missing Skills Detector
-- Career Roadmap
 
 ---
 
