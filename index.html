@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>ResumeAI Pro — Executive ATS Resume Analyzer & Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- PDF.js & Mammoth for client-side PDF & DOCX text extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+</head>
+<body class="theme-dark">
+
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>ResumeAI <span class="badge-pro">PRO</span></h1>
+                    <p class="brand-subtitle">Executive ATS Analyzer & Career Suite</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button type="button" class="btn-theme-toggle" id="themeToggleBtn" title="Toggle Light/Dark Theme" aria-label="Toggle Theme">
+                    <span class="theme-icon light-icon">☀️ Light</span>
+                    <span class="theme-icon dark-icon">🌙 Dark</span>
+                </button>
+                <button type="button" class="btn-mobile-info" id="mobileConnectBtn" title="How to use on Phone" onclick="openPhoneModal()">
+                    📱 Phone Access
+                </button>
+            </div>
+        </div>
+
+        <!-- Mode Navigation Tabs -->
+        <nav class="nav-tabs-wrapper">
+            <div class="nav-tabs" role="tablist">
+                <button class="nav-tab active" id="tabSubmitResume" role="tab" aria-selected="true" onclick="switchMainTab('submit')">
+                    <span class="tab-icon">📤</span>
+                    <span class="tab-label">Submit Resume</span>
+                </button>
+                <button class="nav-tab" id="tabMakeResume" role="tab" aria-selected="false" onclick="switchMainTab('builder')">
+                    <span class="tab-icon">✍️</span>
+                    <span class="tab-label">Make a Resume</span>
+                </button>
+                <button class="nav-tab" id="tabAnalysis" role="tab" aria-selected="false" onclick="switchMainTab('analysis')">
+                    <span class="tab-icon">📊</span>
+                    <span class="tab-label">ATS & Testing Report</span>
+                    <span class="tab-counter" id="reportScoreBadge" style="display:none;">0%</span>
+                </button>
+                <button class="nav-tab" id="tabPreview" role="tab" aria-selected="false" onclick="switchMainTab('preview')">
+                    <span class="tab-icon">📄</span>
+                    <span class="tab-label">Resume Preview</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Visual Overlapping Hero Banner -->
+    <div class="app-hero-banner">
+        <div class="hero-inner">
+            <div class="hero-badge">⚡ TOP-TIER ATS COMPLIANCE ENGINE</div>
+            <h2 class="hero-title">Audit, Optimize & Build Your Dream Resume</h2>
+            <p class="hero-subtitle">Test keyword alignment, uncover missing skills, eliminate AI clichés, and generate tailored interview prep for your target company.</p>
+        </div>
+    </div>
+
+    <!-- Main Content Container (Overlaps Hero Banner) -->
+    <main class="app-main">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: SUBMIT RESUME (Upload / Paste)     -->
+        <!-- ========================================== -->
+        <section id="viewSubmitResume" class="tab-view active">
+            
+            <!-- Position Targeting Bar -->
+            <div class="card target-config-card">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <span class="card-icon-pill">🎯</span>
+                        <div>
+                            <h3>Target Position & Company Settings</h3>
+                            <p class="card-subheading">Powers role-specific keyword matching, ATS scoring, and custom interview questions.</p>
+                        </div>
+                    </div>
+                    <span class="badge-subtle">Targeting Engine</span>
+                </div>
+                <div class="grid-2-col">
+                    <div class="form-group">
+                        <label for="targetPosition">Target Position / Job Title <span class="required">*</span></label>
+                        <div class="input-with-preset">
+                            <input type="text" id="targetPosition" placeholder="e.g. Full Stack Developer, SDE 1, Data Scientist" value="Full Stack Developer">
+                            <select id="positionPresetSelect" onchange="applyPositionPreset(this.value)">
+                                <option value="">Choose preset role...</option>
+                                <option value="Full Stack Developer">Full Stack Developer</option>
+                                <option value="Frontend Engineer">Frontend Engineer</option>
+                                <option value="Backend Engineer">Backend Engineer</option>
+                                <option value="Software Development Engineer (SDE)">Software Development Engineer (SDE)</option>
+                                <option value="Data Scientist">Data Scientist</option>
+                                <option value="AI / Machine Learning Engineer">AI / Machine Learning Engineer</option>
+                                <option value="DevOps & Cloud Engineer">DevOps & Cloud Engineer</option>
+                                <option value="Cybersecurity Analyst">Cybersecurity Analyst</option>
+                                <option value="Mobile App Developer (Flutter/React Native)">Mobile App Developer</option>
+                                <option value="Product Manager">Product Manager</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="targetCompany">Target Company Name <span class="optional">(Optional)</span></label>
+                        <input type="text" id="targetCompany" placeholder="e.g. Google, Microsoft, Amazon, TCS, Infosys, Startup" value="Google">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 14px;">
+                    <div class="label-row">
+                        <label for="jobDescription">Target Job Description</label>
+                        <button type="button" class="btn-text-action" onclick="loadSampleJobDescription()">+ Load Sample Description</button>
+                    </div>
+                    <textarea id="jobDescription" rows="4" placeholder="Paste the job description or required qualifications here for precise keyword matching..."></textarea>
+                </div>
+            </div>
+
+            <!-- Resume Input Section: Upload or Paste Tabs -->
+            <div class="card resume-input-card">
+                <div class="card-header">
+                    <div class="card-header-left">
+                        <span class="card-icon-pill">📄</span>
+                        <div>
+                            <h3>Submit Your Resume Document</h3>
+                            <p class="card-subheading">Upload your file or paste raw text. Click Submit & Analyze to start the full audit.</p>
+                        </div>
+                    </div>
+                    <div class="segmented-control">
+                        <button type="button" class="seg-btn active" id="segUploadBtn" onclick="toggleInputMethod('upload')">📁 Upload File (PDF/DOCX/TXT)</button>
+                        <button type="button" class="seg-btn" id="segPasteBtn" onclick="toggleInputMethod('paste')">📋 Paste Resume Text</button>
+                    </div>
+                </div>
+
+                <!-- Option A: File Upload Zone -->
+                <div id="uploadInputSection" class="input-panel active">
+                    <div class="upload-dropzone" id="dropzone" onclick="document.getElementById('resumeFile').click()">
+                        <input type="file" id="resumeFile" accept=".pdf,.docx,.txt,.rtf,.md" style="display:none;" onchange="handleFileSelected(event)">
+                        <div class="dropzone-icon">
+                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </div>
+                        <h4 class="dropzone-title">Click to upload or drag & drop your resume</h4>
+                        <p class="dropzone-hint">Supports <strong>PDF, DOCX, TXT</strong> documents (Max 10MB). Clean ATS text extraction.</p>
+                        <div class="upload-btn-fake">Choose Resume File</div>
+                    </div>
+
+                    <!-- File Status Card (Shows when file is chosen) -->
+                    <div id="fileStatusCard" class="file-status-card" style="display:none;">
+                        <div class="file-icon-box">📄</div>
+                        <div class="file-details">
+                            <div class="file-name" id="selectedFileName">resume.pdf</div>
+                            <div class="file-meta" id="selectedFileMeta">PDF Document • 45 KB</div>
+                            <div class="file-parsing-status" id="fileParseStatus">Ready to submit</div>
+                        </div>
+                        <button type="button" class="btn-icon-danger" onclick="clearSelectedFile()" title="Remove file">✕</button>
+                    </div>
+                </div>
+
+                <!-- Option B: Raw Text Paste -->
+                <div id="pasteInputSection" class="input-panel" style="display:none;">
+                    <div class="form-group">
+                        <div class="label-row">
+                            <label for="resumeText">Paste Full Resume Text</label>
+                            <span class="char-count" id="resumeTextCount">0 characters</span>
+                        </div>
+                        <textarea id="resumeText" rows="12" placeholder="Paste your entire resume text here including Education, Experience, Projects, Skills, and Certifications..." oninput="updateResumeTextCount()"></textarea>
+                    </div>
+                </div>
+
+                <!-- Action / Submit Buttons Area -->
+                <div class="submit-action-bar">
+                    <div class="submit-hint">
+                        <span class="info-dot">●</span> Checks 20+ ATS criteria, keywords, role alignment, and weak phrases.
+                    </div>
+                    <div class="submit-buttons-group">
+                        <button type="button" class="btn btn-secondary" onclick="loadSampleResumeText()">
+                            📝 Load Sample Resume
+                        </button>
+                        <button type="button" id="submitResumeBtn" class="btn btn-primary btn-large" onclick="submitAndAnalyzeResume()">
+                            <span class="btn-icon">🚀</span>
+                            <span class="btn-text">Submit & Analyze Resume</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: MAKE A RESUME (Interactive Builder) -->
+        <!-- ========================================== -->
+        <section id="viewMakeResume" class="tab-view" style="display:none;">
+            <div class="section-intro">
+                <div class="intro-flex">
+                    <div>
+                        <h2>Interactive Resume Builder</h2>
+                        <p>Fill in your details below to create an ATS-optimized, executive resume. All fields support custom items, optional student details, and dynamic sections.</p>
+                    </div>
+                    <div class="builder-quick-actions">
+                        <button type="button" class="btn btn-sm btn-outline" onclick="loadBuilderSampleData()">
+                            ✨ Fill Sample Data
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="exportResumeJSON()">
+                            💾 Save JSON
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="triggerImportResumeJSON()">
+                            📂 Load JSON
+                        </button>
+                        <input type="file" id="jsonFileInput" accept=".json" style="display:none;" onchange="importResumeJSON(event)">
+                    </div>
+                </div>
+            </div>
+
+            <form id="resumeBuilderForm" onsubmit="event.preventDefault(); submitBuiltResume();">
+                
+                <!-- Section 1: Personal & Sender Details -->
+                <div class="builder-card">
+                    <span class="step-num-badge">1</span>
+                    <div class="builder-card-header">
+                        <div class="header-title">
+                            <h3>Personal & Sender Information</h3>
+                        </div>
+                        <span class="badge-subtle">Core Header</span>
+                    </div>
+                    <div class="builder-card-body">
+                        <div class="grid-3-col">
+                            <div class="form-group">
+                                <label for="b_fullName">Full Name <span class="required">*</span></label>
+                                <input type="text" id="b_fullName" placeholder="e.g. Alex Sharma" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="b_email">Personal Email <span class="required">*</span></label>
+                                <input type="email" id="b_email" placeholder="e.g. alex.sharma@gmail.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="b_phone">Phone Number <span class="required">*</span></label>
+                                <input type="tel" id="b_phone" placeholder="e.g. +91 98765 43210" required>
+                            </div>
+                        </div>
+
+                        <div class="grid-3-col" style="margin-top: 14px;">
+                            <div class="form-group">
+                                <label for="b_collegeEmail">College Provided Email <span class="optional">(Optional)</span></label>
+                                <input type="email" id="b_collegeEmail" placeholder="e.g. alex.s@college.edu.in">
+                            </div>
+                            <div class="form-group">
+                                <label for="b_rollNumber">Roll / Student ID Number <span class="optional">(Optional)</span></label>
+                                <input type="text" id="b_rollNumber" placeholder="e.g. 21BCSE104">
+                            </div>
+                            <div class="form-group">
+                                <label for="b_location">Location / City</label>
+                                <input type="text" id="b_location" placeholder="e.g. Bengaluru, India">
+                            </div>
+                        </div>
+
+                        <div class="grid-2-col" style="margin-top: 14px;">
+                            <div class="form-group">
+                                <label for="b_linkedin">LinkedIn Profile URL</label>
+                                <input type="url" id="b_linkedin" placeholder="e.g. https://linkedin.com/in/alexsharma">
+                            </div>
+                            <div class="form-group">
+                                <label for="b_github">GitHub / Portfolio URL</label>
+                                <input type="url" id="b_github" placeholder="e.g. https://github.com/alexsharma">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 14px;">
+                            <label for="b_summary">Professional Summary / Objective</label>
+                            <textarea id="b_summary" rows="3" placeholder="Results-driven Software Engineer with strong foundations in full-stack web architectures, algorithms, and distributed systems..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Education & Degrees -->
+                <div class="builder-card">
+                    <span class="step-num-badge">2</span>
+                    <div class="builder-card-header">
+                        <div class="header-title">
+                            <h3>Education & Degrees</h3>
+                        </div>
+                        <button type="button" class="btn btn-xs btn-outline" onclick="addEducationItem()">+ Add Another Degree</button>
+                    </div>
+                    <div class="builder-card-body">
+                        <div id="educationListContainer" class="dynamic-items-container">
+                            <!-- Dynamically added degree items appear here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Core Coursework / Courses -->
+                <div class="builder-card">
+                    <span class="step-num-badge">3</span>
+                    <div class="builder-card-header">
+                        <div class="header-title">
+                            <h3>Key Academic Courses & Subjects</h3>
+                        </div>
+                        <span class="badge-subtle">ATS Core Subject Match</span>
+                    </div>
+                    <div class="builder-card-body">
+                        <div class="form-group">
+                            <label for="b_courses">List Relevant Courses (Comma-separated or bullet list)</label>
+                            <input type="text" id="b_courses" placeholder="Data Structures & Algorithms, Operating Systems, Database Management Systems, Computer Networks, Software Engineering">
+                            <div class="course-presets">
+                                <span class="preset-label">Quick Add:</span>
+                                <button type="button" class="chip-preset" onclick="appendCourse('Data Structures & Algorithms')">+ DSA</button>
+                                <button type="button" class="chip-preset" onclick="appendCourse('Database Management Systems (DBMS)')">+ DBMS</button>
+                                <button type="button" class="chip-preset" onclick="appendCourse('Operating Systems')">+ OS</button>
+                                <button type="button" class="chip-preset" onclick="appendCourse('Computer Networks')">+ Networks</button>
+                                <button type="button" class="chip-preset" onclick="appendCourse('Object-Oriented Programming')">+ OOPs</button>
+                                <button type="button" class="chip-preset" onclick="appendCourse('System Design')">+ System Design</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Skills -->
+                <div class="builder-card">
+                    <span class="step-num-badge">4</span>
+                    <div class="builder-card-header">
+                        <div class="header-title">
+                            <h3>Technical & Professional Skills</h3>
+                        </div>
+                        <span class="badge-subtle">Categorized</span>
+                    </div>
+                    <div class="builder-card-body">
+                        <div class="grid-2-col">
+                            <div class="form-group">
+                                <label for="b_skillsLanguages">Programming Languages</label>
+                                <input type="text" id="b_skillsLanguages" placeholder="Python, Java, JavaScript, TypeScript, C++, SQL">
+                            </div>
+                            <div class="form-group">
+                                <label for="b_skillsFrameworks">Frameworks & Libraries</label>
+                                <input type="text" id="b_skillsFrameworks" placeholder="React, Node.js, Express, Next.js, Django, Tailwind CSS">
+                            </div>
+                        </div>
+                        <div class="grid-2-col" style="margin-top: 14px;">
+                            <div class="form-group">
+                                <label for="b_skillsTools">Tools, Cloud & Databases</label>
+                                <input type="text" id="b_skillsTools" placeholder="Git, GitHub, Docker, AWS, MongoDB, PostgreSQL, Linux">
+                            </div>
+                            <div class="form-group">
+                                <label for="b_skillsSoft">Soft Skills & Methodologies</label>
+                                <input type="text" id="b_skillsSoft" placeholder="Agile/Scrum, Problem Solving, Cross-Functional Collaboration">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Projects -->
+                <div class="builder-card">
+                    <span class="step-num-badge">5</span>
+                    <div class="builder-card-header">
+                        <div class="header-title">
+                            <h3>Projects & Technical Work</h3>
+                        </div>
+                        <button type="button" class="btn btn-xs btn-outline" onclick="addProjectItem()">+ Add Another Project</button>
+                    </div>
+                    <div class="builder-card-body">
+                        <div id="projectsListContainer" class="dynamic-items-container">
+                            <!-- Dynamic project items go here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 6: Internships & Work Experience -->
+                <div class="builder-card">
+                    <span class="step-num-badge">6</span>
+                    <div class="builder-card-header">
+                        <div class="header-title">
+                            <h3>Internships & Experience</h3>
+                        </div>
+                        <button type="button" class="btn btn-xs btn-outline" onclick="addExperienceItem()">+ Add Internship / Experience</button>
+                    </div>
+                    <div class="builder-card-body">
+                        <div id="experienceListContainer" class="dynamic-items-container">
+                            <!-- Dynamic experience items go here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 7: Certifications -->
+                <div class="builder-card">
+                    <span class="step-num-badge">7</span>
+                    <div class="builder-card-header">
+                        <div class="header-title">
+                            <h3>Certificates & Accreditations</h3>
+                        </div>
+                        <button type="button" class="btn btn-xs btn-outline" onclick="addCertificationItem()">+ Add Certificate</button>
+                    </div>
+                    <div class="builder-card-body">
+                        <div id="certificationsListContainer" class="dynamic-items-container">
+                            <!-- Dynamic certificate items go here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 8: Achievements & Honors -->
+                <div class="builder-card">
+                    <span class="step-num-badge">8</span>
+                    <div class="builder-card-header">
+                        <div class="header-title">
+                            <h3>Achievements & Awards</h3>
+                        </div>
+                        <button type="button" class="btn btn-xs btn-outline" onclick="addAchievementItem()">+ Add Achievement</button>
+                    </div>
+                    <div class="builder-card-body">
+                        <div id="achievementsListContainer" class="dynamic-items-container">
+                            <!-- Dynamic achievement items go here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 9: Extra Custom Sections (User requested: "extra things to add manually") -->
+                <div class="builder-card">
+                    <span class="step-num-badge">9</span>
+                    <div class="builder-card-header">
+                        <div class="header-title">
+                            <h3>Extra Custom Sections</h3>
+                        </div>
+                        <button type="button" class="btn btn-xs btn-outline" onclick="addCustomSection()">+ Add Custom Section</button>
+                    </div>
+                    <div class="builder-card-body">
+                        <p class="builder-hint">Add any custom section you need such as <em>Extracurricular Activities, Publications, Languages, Volunteer Experience, or Patents</em>.</p>
+                        <div id="customSectionsContainer" class="dynamic-items-container">
+                            <!-- Custom sections added dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Builder Submission & Actions -->
+                <div class="builder-action-footer">
+                    <div class="footer-buttons">
+                        <button type="button" class="btn btn-secondary btn-large" onclick="previewBuiltResume()">
+                            👁️ Preview Formatted Resume
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-large">
+                            🚀 Submit Built Resume to ATS Tester
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: ATS & TESTING REPORT (Results)      -->
+        <!-- ========================================== -->
+        <section id="viewAnalysis" class="tab-view" style="display:none;">
+            <div class="section-intro">
+                <div class="intro-flex">
+                    <div>
+                        <h2>ATS Evaluation & Role Readiness Audit</h2>
+                        <p id="analysisMetaLabel">Detailed audit for Target Role & Company against industry hiring standards.</p>
+                    </div>
+                    <div class="report-actions">
+                        <button type="button" class="btn btn-sm btn-outline" onclick="downloadReportText()">
+                            📥 Download Text Report
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="printReport()">
+                            🖨️ Print / Save PDF Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State if analysis hasn't been run yet -->
+            <div id="emptyAnalysisState" class="card empty-state-card">
+                <div class="empty-icon">📊</div>
+                <h3>No Resume Submitted Yet</h3>
+                <p>Submit your resume from the <strong>Submit Resume</strong> tab or build one in the <strong>Make a Resume</strong> builder to view real-time ATS scoring, keyword gaps, and interview prep.</p>
+                <div class="empty-actions">
+                    <button type="button" class="btn btn-primary" onclick="switchMainTab('submit')">Upload or Paste Resume</button>
+                    <button type="button" class="btn btn-secondary" onclick="loadSampleResumeText(); submitAndAnalyzeResume();">Run with Sample Resume</button>
+                </div>
+            </div>
+
+            <!-- Full Dashboard Grid (Shown when analyzed) -->
+            <div id="analysisDashboard" style="display:none;">
+
+                <!-- Executive Score Overview Cards -->
+                <div class="overview-grid">
+                    <!-- Main ATS Score Card -->
+                    <div class="metric-card score-main-card">
+                        <div class="metric-header">
+                            <span class="metric-title">ATS Composite Score</span>
+                            <span class="badge-status" id="atsScoreBadge">Needs Work</span>
+                        </div>
+                        <div class="score-display">
+                            <div class="score-circle-wrapper">
+                                <svg class="score-ring" width="130" height="130">
+                                    <circle class="score-ring-bg" stroke-width="10" cx="65" cy="65" r="54"></circle>
+                                    <circle class="score-ring-bar" id="scoreRingProgress" stroke-width="10" cx="65" cy="65" r="54"></circle>
+                                </svg>
+                                <div class="score-number-box">
+                                    <span class="score-value" id="overallScoreVal">0</span>
+                                    <span class="score-max">/100</span>
+                                </div>
+                            </div>
+                            <div class="score-summary-text">
+                                <h4 id="scoreHeadline">Calculating...</h4>
+                                <p id="scoreSubline">Evaluation against ATS filtering algorithms.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Role & Company Match Card -->
+                    <div class="metric-card match-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Position Alignment</span>
+                            <span class="badge-neutral" id="targetRoleBadge">Target Role</span>
+                        </div>
+                        <div class="match-percentage-box">
+                            <div class="match-val-row">
+                                <span class="big-match-val" id="matchPercentVal">0%</span>
+                                <span class="match-label">Keyword Match Rate</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" id="matchBarFill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="match-meta-info" id="companyContextInfo">
+                            Target Company: <strong id="companyContextName">General Tech</strong>
+                        </div>
+                    </div>
+
+                    <!-- Readiness Summary Card -->
+                    <div class="metric-card readiness-card">
+                        <div class="metric-header">
+                            <span class="metric-title">Audit Highlights</span>
+                        </div>
+                        <div class="mini-metrics-list">
+                            <div class="mini-metric">
+                                <span class="mini-label">Quantified Impact</span>
+                                <span class="mini-val" id="metricImpactVal">0 metrics</span>
+                            </div>
+                            <div class="mini-metric">
+                                <span class="mini-label">Action Verbs</span>
+                                <span class="mini-val" id="metricActionVal">0 detected</span>
+                            </div>
+                            <div class="mini-metric">
+                                <span class="mini-label">Weak Phrases</span>
+                                <span class="mini-val" id="metricWeakVal">0 detected</span>
+                            </div>
+                            <div class="mini-metric">
+                                <span class="mini-label">Section Completeness</span>
+                                <span class="mini-val" id="metricSectionsVal">0 / 6</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ATS Component Breakdown Details -->
+                <div class="card detail-card">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <span class="card-icon-pill">📊</span>
+                            <h3>ATS Evaluation Breakdown</h3>
+                        </div>
+                        <span class="badge-subtle">5 Weighted Pillars</span>
+                    </div>
+                    <div class="ats-pillars-grid">
+                        <div class="pillar-item">
+                            <div class="pillar-top">
+                                <span class="pillar-name">Contact & Identification</span>
+                                <span class="pillar-score" id="pillarContactScore">0 / 15</span>
+                            </div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill" id="pillarContactBar" style="width: 0%;"></div></div>
+                            <p class="pillar-desc" id="pillarContactDesc">Checks email, phone, location & profiles.</p>
+                        </div>
+                        <div class="pillar-item">
+                            <div class="pillar-top">
+                                <span class="pillar-name">Section Architecture</span>
+                                <span class="pillar-score" id="pillarSectionsScore">0 / 20</span>
+                            </div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill" id="pillarSectionsBar" style="width: 0%;"></div></div>
+                            <p class="pillar-desc" id="pillarSectionsDesc">Education, Experience, Projects & Skills.</p>
+                        </div>
+                        <div class="pillar-item">
+                            <div class="pillar-top">
+                                <span class="pillar-name">Role Keyword Relevance</span>
+                                <span class="pillar-score" id="pillarKeywordsScore">0 / 30</span>
+                            </div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill" id="pillarKeywordsBar" style="width: 0%;"></div></div>
+                            <p class="pillar-desc" id="pillarKeywordsDesc">Match with required position skills.</p>
+                        </div>
+                        <div class="pillar-item">
+                            <div class="pillar-top">
+                                <span class="pillar-name">Action Verbs & Quantified Impact</span>
+                                <span class="pillar-score" id="pillarImpactScore">0 / 20</span>
+                            </div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill" id="pillarImpactBar" style="width: 0%;"></div></div>
+                            <p class="pillar-desc" id="pillarImpactDesc">Metrics, results, %, and active verbs.</p>
+                        </div>
+                        <div class="pillar-item">
+                            <div class="pillar-top">
+                                <span class="pillar-name">Readability & ATS Formatting</span>
+                                <span class="pillar-score" id="pillarFormatScore">0 / 15</span>
+                            </div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill" id="pillarFormatBar" style="width: 0%;"></div></div>
+                            <p class="pillar-desc" id="pillarFormatDesc">Clean hierarchy, scanability & structure.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Missing Keywords & Job Match Analysis -->
+                <div class="grid-2-col">
+                    <div class="card detail-card">
+                        <div class="card-header">
+                            <div class="card-header-left">
+                                <span class="card-icon-pill">🔍</span>
+                                <h3>Missing Critical Keywords</h3>
+                            </div>
+                            <button type="button" class="btn-text-action" onclick="copyMissingKeywords()">Copy All Missing</button>
+                        </div>
+                        <p class="card-explainer">Add these essential industry keywords to your resume to pass automated ATS filters for this target role:</p>
+                        <div class="chips-container" id="missingKeywordsContainer">
+                            <span class="no-items">None! Great job covering essential keywords.</span>
+                        </div>
+                    </div>
+
+                    <div class="card detail-card">
+                        <div class="card-header">
+                            <div class="card-header-left">
+                                <span class="card-icon-pill">✅</span>
+                                <h3>Matched Keywords & Competencies</h3>
+                            </div>
+                            <span class="badge-subtle" id="matchedCountBadge">0 Matched</span>
+                        </div>
+                        <p class="card-explainer">Keywords identified in your resume that strongly match the position:</p>
+                        <div class="chips-container" id="matchedKeywordsContainer">
+                            <span class="no-items">No matches found yet.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actionable Suggestions & Weak Content Flagging -->
+                <div class="card detail-card">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <span class="card-icon-pill">💡</span>
+                            <h3>Actionable Recommendations & Suggestions</h3>
+                        </div>
+                        <span class="badge-subtle">Prioritized Checklist</span>
+                    </div>
+                    <div class="suggestions-list" id="suggestionsListContainer">
+                        <!-- Suggestions populated here -->
+                    </div>
+                </div>
+
+                <!-- Weak Phrase Detector & High Impact Replacements -->
+                <div class="card detail-card">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <span class="card-icon-pill">⚡</span>
+                            <h3>Cliché & Weak Phrase Replacer</h3>
+                        </div>
+                        <span class="badge-subtle">Sound Human & Professional</span>
+                    </div>
+                    <p class="card-explainer">Vague clichés like "quick learner" or "responsible for" hurt ATS ranking and make resumes sound generic or AI-spun. Replace them with high-impact, measurable alternatives:</p>
+                    <div class="weak-phrases-table-wrapper">
+                        <table class="weak-table">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Detected Weak Phrase</th>
+                                    <th>High-Impact Professional Replacement</th>
+                                </tr>
+                            </thead>
+                            <tbody id="weakPhrasesTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Company & Position Tailored Interview Questions -->
+                <div class="card detail-card">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <span class="card-icon-pill">🤖</span>
+                            <div>
+                                <h3>Tailored Interview Questions</h3>
+                                <p class="card-subheading" id="interviewQuestionsSub">Customized for your target company, position, and listed projects</p>
+                            </div>
+                        </div>
+                        <span class="badge-subtle">Preparation Suite</span>
+                    </div>
+                    <div class="interview-tabs">
+                        <div class="interview-categories" id="interviewTabsList">
+                            <button class="cat-pill active" onclick="switchInterviewCategory('all')">All Questions</button>
+                            <button class="cat-pill" onclick="switchInterviewCategory('technical')">Technical & Architecture</button>
+                            <button class="cat-pill" onclick="switchInterviewCategory('company')">Company & Behavioral</button>
+                            <button class="cat-pill" onclick="switchInterviewCategory('project')">Project Specific</button>
+                        </div>
+                        <div class="interview-questions-list" id="interviewQuestionsContainer">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Career Progression Roadmap -->
+                <div class="card detail-card">
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <span class="card-icon-pill">🗺️</span>
+                            <div>
+                                <h3>Targeted Career Roadmap</h3>
+                                <p class="card-subheading" id="roadmapSub">Step-by-step career path to level up for your target role</p>
+                            </div>
+                        </div>
+                        <span class="badge-subtle">Career Strategy</span>
+                    </div>
+                    <div class="career-timeline" id="careerRoadmapContainer">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: RESUME PREVIEW & PRINT (Standard)  -->
+        <!-- ========================================== -->
+        <section id="viewPreview" class="tab-view" style="display:none;">
+            <div class="section-intro no-print">
+                <div class="intro-flex">
+                    <div>
+                        <h2>Executive Standard Resume Preview</h2>
+                        <p>Standard Harvard / Top-Tier ATS layout with crisp typography, clean hierarchy, and print-ready formatting.</p>
+                    </div>
+                    <div class="preview-actions">
+                        <button type="button" class="btn btn-sm btn-outline" onclick="switchMainTab('builder')">
+                            ✏️ Edit in Builder
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="printResumeDocument()">
+                            🖨️ Print / Save as PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Printable Professional Resume Document Card -->
+            <div class="resume-sheet-container">
+                <div class="resume-sheet" id="printableResumeDoc">
+                    <!-- Standard Clean Header -->
+                    <div class="resume-doc-header">
+                        <h1 class="resume-candidate-name" id="docName">ALEX SHARMA</h1>
+                        <div class="resume-contact-line" id="docContactLine">
+                            alex.sharma@gmail.com • +91 98765 43210 • Bengaluru, India • linkedin.com/in/alexsharma • github.com/alexsharma
+                        </div>
+                        <div class="resume-student-meta" id="docStudentMeta" style="display:none;">
+                            Roll No: <span id="docRoll">21BCSE104</span> | College Email: <span id="docCollegeEmail">alex.s@college.edu.in</span>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="resume-doc-section" id="docSectionSummary">
+                        <h2 class="doc-section-title">PROFESSIONAL SUMMARY</h2>
+                        <p class="doc-text" id="docSummary">Results-oriented Software Engineer with proven expertise in building scalable web architectures and robust backend microservices.</p>
+                    </div>
+
+                    <!-- Education -->
+                    <div class="resume-doc-section" id="docSectionEducation">
+                        <h2 class="doc-section-title">EDUCATION</h2>
+                        <div id="docEducationEntries"></div>
+                    </div>
+
+                    <!-- Relevant Coursework -->
+                    <div class="resume-doc-section" id="docSectionCourses" style="display:none;">
+                        <h2 class="doc-section-title">RELEVANT COURSEWORK</h2>
+                        <p class="doc-text" id="docCourses"></p>
+                    </div>
+
+                    <!-- Technical Skills -->
+                    <div class="resume-doc-section" id="docSectionSkills">
+                        <h2 class="doc-section-title">TECHNICAL SKILLS</h2>
+                        <div class="skills-category-rows" id="docSkillsRows"></div>
+                    </div>
+
+                    <!-- Experience / Internships -->
+                    <div class="resume-doc-section" id="docSectionExperience">
+                        <h2 class="doc-section-title">INTERNSHIPS & EXPERIENCE</h2>
+                        <div id="docExperienceEntries"></div>
+                    </div>
+
+                    <!-- Projects -->
+                    <div class="resume-doc-section" id="docSectionProjects">
+                        <h2 class="doc-section-title">TECHNICAL PROJECTS</h2>
+                        <div id="docProjectsEntries"></div>
+                    </div>
+
+                    <!-- Certifications -->
+                    <div class="resume-doc-section" id="docSectionCertifications" style="display:none;">
+                        <h2 class="doc-section-title">CERTIFICATIONS</h2>
+                        <div id="docCertificationsEntries"></div>
+                    </div>
+
+                    <!-- Achievements -->
+                    <div class="resume-doc-section" id="docSectionAchievements" style="display:none;">
+                        <h2 class="doc-section-title">HONORS & ACHIEVEMENTS</h2>
+                        <div id="docAchievementsEntries"></div>
+                    </div>
+
+                    <!-- Extra Custom Sections -->
+                    <div id="docCustomSectionsEntries"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Phone Access Modal (Helping user open on phone seamlessly) -->
+    <div id="phoneModal" class="modal-backdrop" style="display:none;" onclick="closePhoneModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>📱 How to Open on Your Mobile Phone</h3>
+                <button type="button" class="modal-close-btn" onclick="closePhoneModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p>This application is 100% responsive and optimized for mobile browsers (iPhone Safari, Android Chrome).</p>
+                <div class="phone-steps-list">
+                    <div class="phone-step">
+                        <span class="step-badge">1</span>
+                        <div>Make sure your phone and laptop are connected to the <strong>same Wi-Fi network</strong>.</div>
+                    </div>
+                    <div class="phone-step">
+                        <span class="step-badge">2</span>
+                        <div>Run the provided desktop launcher: <code>run_app.bat</code> or execute <code>python server.py</code> in the folder.</div>
+                    </div>
+                    <div class="phone-step">
+                        <span class="step-badge">3</span>
+                        <div>Open your phone's browser and visit the local network URL shown in the server window (for example: <code>http://192.168.1.X:8000</code>).</div>
+                    </div>
+                </div>
+                <div class="modal-tip">
+                    💡 <strong>Tip:</strong> You can also bookmark the link on your mobile phone home screen for instant access like a native app!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="closePhoneModal()">Got It</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- Application Script -->
+    <script src="script.js"></script>
+</body>
+</html>
